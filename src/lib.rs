@@ -18,6 +18,7 @@ pub enum Token {
 #[derive(Debug)]
 pub enum BrainfuckError {
 	BucketOutOfRange,
+	ValueOutOfRange,
 	UnexpectedLoopEnd,
 }
 
@@ -63,8 +64,18 @@ pub fn exec(tokens: Vec<Token>) -> Result<(), BrainfuckError> {
 
 				ptr -= 1;
 			},
-			Token::IncrData => buckets[ptr] += 1,
-			Token::DecrData => buckets[ptr] -= 1,
+			Token::IncrData => {
+				if buckets[ptr] == 255 {
+					return Err(BrainfuckError::ValueOutOfRange);
+				}
+				buckets[ptr] += 1;
+			},
+			Token::DecrData => {
+				if buckets[ptr] == 0 {
+					return Err(BrainfuckError::ValueOutOfRange);
+				}
+				buckets[ptr] -= 1;
+			}
 			Token::Output => print!("{}", buckets[ptr] as char),
 			Token::LoopBegin =>	saved_ti.push(ti),
 			Token::LoopEnd => {
