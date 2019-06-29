@@ -4,11 +4,13 @@ Brainfuck interpreter written in Rust.
 
 ## Usage
 
-Using cargo:```
+Using cargo:
+```
 $ cargo run -- sample.bf
 ```
 
-Using the executable:```
+Using the executable:
+```
 $ bf sample.bf
 ```
 
