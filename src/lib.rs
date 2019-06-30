@@ -1,19 +1,6 @@
 use std::fs::File;
 use std::io::{stdin, Read};
 
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Token {
-	IncrPtr,
-	DecrPtr,
-	IncrData,
-	DecrData,
-	Output,
-	Input,
-	LoopBegin,
-	LoopEnd,
-	Empty,
-}
-
 #[derive(Debug)]
 pub enum BrainfuckError {
 	BucketOutOfRange,
@@ -21,68 +8,50 @@ pub enum BrainfuckError {
 	UnexpectedLoopEnd,
 }
 
-pub fn parse(source: &str) -> Vec<Token> {
-	let bytes = source.as_bytes();
-	bytes.into_iter().map(|byte| {
-		match byte {
-			b'>' => Token::IncrPtr,
-			b'<' => Token::DecrPtr,
-			b'+' => Token::IncrData,
-			b'-' => Token::DecrData,
-			b'.' => Token::Output,
-			b',' => Token::Input,
-			b'[' => Token::LoopBegin,
-			b']' => Token::LoopEnd,
-			_ => Token::Empty,
-		}
-	}).filter(|t| t != &Token::Empty).collect()
-}
-
-pub fn exec(tokens: Vec<Token>) -> Result<(), BrainfuckError> {
+pub fn run(input: &str) -> Result<(), BrainfuckError> {
+	let bytes: Vec<u8> = input.bytes().collect();
 	let mut buckets: Vec<u8> = vec![0];
 	let mut ptr = 0;
 	let mut saved_ti = Vec::new();
 	let mut stdin = stdin();
 
 	let mut ti = 0;
-	while ti < tokens.len() {
-		let token = tokens[ti];
-
-		match token {
-			Token::IncrPtr => {
+	while ti < bytes.len() {
+		match bytes[ti] {
+			b'>' => {
 				if ptr == (buckets.len() - 1) {
 					buckets.push(0);
 				}
 
 				ptr += 1;
 			},
-			Token::DecrPtr => {
+			b'<' => {
 				if ptr == 0 {
 					return Err(BrainfuckError::BucketOutOfRange);
 				}
 
 				ptr -= 1;
 			},
-			Token::IncrData => {
+			b'+' => {
 				if buckets[ptr] == 255 {
 					return Err(BrainfuckError::ValueOutOfRange);
 				}
 				buckets[ptr] += 1;
 			},
-			Token::DecrData => {
+			b'-' => {
 				if buckets[ptr] == 0 {
 					return Err(BrainfuckError::ValueOutOfRange);
 				}
 				buckets[ptr] -= 1;
 			}
-			Token::Output => print!("{}", buckets[ptr] as char),
-			Token::Input => {
+			b'.' => print!("{}", buckets[ptr] as char),
+			b',' => {
 				let mut buf: [u8; 1] = [0];
 				stdin.read(&mut buf).expect("to read from stdin");
 				buckets[ptr] = buf[0];
 			},
-			Token::LoopBegin => saved_ti.push(ti),
-			Token::LoopEnd => {
+			b'[' => saved_ti.push(ti),
+			b']' => {
 				if buckets[ptr] != 0 {
 					match saved_ti.last() {
 						None => return Err(BrainfuckError::UnexpectedLoopEnd),
@@ -94,18 +63,13 @@ pub fn exec(tokens: Vec<Token>) -> Result<(), BrainfuckError> {
 					}
 				}
 			},
-			Token::Empty => {},
+			_ => {},
 		}
 
 		ti += 1;
 	}
 
 	Ok(())
-}
-
-pub fn run(source: &str) -> Result<(), BrainfuckError> {
-	let tokens = parse(source);
-	exec(tokens)
 }
 
 pub fn run_from_file(fp: &str) -> Result<(), BrainfuckError> {
