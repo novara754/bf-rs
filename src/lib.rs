@@ -9,6 +9,8 @@ pub enum BrainfuckError {
 }
 
 pub fn run(input: &str) -> Result<(), BrainfuckError> {
+	use BrainfuckError::*;
+
 	let bytes: Vec<u8> = input.bytes().collect();
 	let mut buckets: Vec<u8> = vec![0];
 	let mut ptr = 0;
@@ -27,20 +29,20 @@ pub fn run(input: &str) -> Result<(), BrainfuckError> {
 			},
 			b'<' => {
 				if ptr == 0 {
-					return Err(BrainfuckError::BucketOutOfRange);
+					return Err(BucketOutOfRange);
 				}
 
 				ptr -= 1;
 			},
 			b'+' => {
 				if buckets[ptr] == 255 {
-					return Err(BrainfuckError::ValueOutOfRange);
+					return Err(ValueOutOfRange);
 				}
 				buckets[ptr] += 1;
 			},
 			b'-' => {
 				if buckets[ptr] == 0 {
-					return Err(BrainfuckError::ValueOutOfRange);
+					return Err(ValueOutOfRange);
 				}
 				buckets[ptr] -= 1;
 			}
@@ -54,12 +56,12 @@ pub fn run(input: &str) -> Result<(), BrainfuckError> {
 			b']' => {
 				if buckets[ptr] != 0 {
 					match saved_ti.last() {
-						None => return Err(BrainfuckError::UnexpectedLoopEnd),
+						None => return Err(UnexpectedLoopEnd),
 						Some(i) => ti = *i,
 					}
 				} else {
 					if let None = saved_ti.pop() {
-						return Err(BrainfuckError::UnexpectedLoopEnd);
+						return Err(UnexpectedLoopEnd);
 					}
 				}
 			},
