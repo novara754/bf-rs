@@ -12,7 +12,6 @@ pub enum Token {
 	LoopBegin,
 	LoopEnd,
 	Empty,
-	Error(u8),
 }
 
 #[derive(Debug)]
@@ -34,8 +33,7 @@ pub fn parse(source: &str) -> Vec<Token> {
 			b',' => Token::Input,
 			b'[' => Token::LoopBegin,
 			b']' => Token::LoopEnd,
-			b if b.is_ascii_whitespace() => Token::Empty,
-			b => Token::Error(*b),
+			b => Token::Empty,
 		}
 	}).filter(|t| t != &Token::Empty).collect()
 }
@@ -77,7 +75,7 @@ pub fn exec(tokens: Vec<Token>) -> Result<(), BrainfuckError> {
 				buckets[ptr] -= 1;
 			}
 			Token::Output => print!("{}", buckets[ptr] as char),
-			Token::LoopBegin =>	saved_ti.push(ti),
+			Token::LoopBegin => saved_ti.push(ti),
 			Token::LoopEnd => {
 				if buckets[ptr] != 0 {
 					match saved_ti.last() {
