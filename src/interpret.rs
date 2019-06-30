@@ -52,7 +52,21 @@ pub fn run(input: &str) -> Result<(), BrainfuckError> {
 				stdin.read(&mut buf).expect("to read from stdin");
 				buckets[ptr] = buf[0];
 			},
-			b'[' => saved_ti.push(ti),
+			b'[' => {
+				if buckets[ptr] == 0 {
+					let mut depth = 0;
+					while bytes[ti] != b']' && depth != 0 {
+						if bytes[ti] == b'[' {
+							depth += 1;
+						} else if bytes[ti] == b']' {
+							depth -= 1;
+						}
+						ti += 1;
+					}
+				} else {
+					saved_ti.push(ti);
+				}
+			}
 			b']' => {
 				if buckets[ptr] != 0 {
 					match saved_ti.last() {
@@ -70,6 +84,7 @@ pub fn run(input: &str) -> Result<(), BrainfuckError> {
 
 		ti += 1;
 	}
+	println!("");
 
 	Ok(())
 }

@@ -23,8 +23,8 @@ int main(void) {
 			b'-' => c_code.push_str("(*ptr)--;\n"),
 			b'.' => c_code.push_str("printf(\"%c\", *ptr);\n"),
 			b',' => c_code.push_str("*ptr = fgetc(stdin);\n"),
-			b'[' => c_code.push_str("do {\n"),
-			b']' => c_code.push_str("} while (*ptr != 0); \n"),
+			b'[' => c_code.push_str("while (*ptr != 0) {\n"),
+			b']' => c_code.push_str("} \n"),
 			_ => {},
 		}
 
@@ -58,7 +58,7 @@ pub fn compile(source: &str, path: &Path) -> std::io::Result<()> {
 			.spawn()?;
 	}
 
-	remove_file(c_path)?;
+	// remove_file(c_path)?;
 
 	Ok(())
 }
