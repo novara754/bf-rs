@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{Read};
+use std::io::{stdin, Read};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
@@ -42,6 +42,7 @@ pub fn exec(tokens: Vec<Token>) -> Result<(), BrainfuckError> {
 	let mut buckets: Vec<u8> = vec![0];
 	let mut ptr = 0;
 	let mut saved_ti = Vec::new();
+	let mut stdin = stdin();
 
 	let mut ti = 0;
 	while ti < tokens.len() {
@@ -75,6 +76,11 @@ pub fn exec(tokens: Vec<Token>) -> Result<(), BrainfuckError> {
 				buckets[ptr] -= 1;
 			}
 			Token::Output => print!("{}", buckets[ptr] as char),
+			Token::Input => {
+				let mut buf: [u8; 1] = [0];
+				stdin.read(&mut buf).expect("to read from stdin");
+				buckets[ptr] = buf[0];
+			},
 			Token::LoopBegin => saved_ti.push(ti),
 			Token::LoopEnd => {
 				if buckets[ptr] != 0 {
@@ -88,8 +94,7 @@ pub fn exec(tokens: Vec<Token>) -> Result<(), BrainfuckError> {
 					}
 				}
 			},
-			// TODO: Implement support for stdin.
-			_ => unimplemented!(),
+			Token::Empty => {},
 		}
 
 		ti += 1;
