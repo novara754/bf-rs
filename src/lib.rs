@@ -33,7 +33,7 @@ pub fn parse(source: &str) -> Vec<Token> {
 			b',' => Token::Input,
 			b'[' => Token::LoopBegin,
 			b']' => Token::LoopEnd,
-			b => Token::Empty,
+			_ => Token::Empty,
 		}
 	}).filter(|t| t != &Token::Empty).collect()
 }
