@@ -1,6 +1,6 @@
 # bf
 
-Brainfuck interpreter written in Rust.
+Brainfuck interpreter & compiler written in Rust.
 
 ## Usage
 
