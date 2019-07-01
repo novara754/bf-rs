@@ -4,57 +4,56 @@ use std::io::{Read, Write};
 use std::process::Command;
 
 pub fn generate_c(source: &str) -> String {
-	let mut c_code = String::from("
-#include <stdio.h>
-#include <stdint.h>
-
-int main(void) {
-	uint8_t buckets[256] = {0};
-	uint8_t *ptr = buckets;
+	let mut code = String::from("
+fn main() {
+	let mut buckets: [u8; 256] = [0; 256];
+	let mut ptr = 0;
+	let mut out = String::new();
+	#[allow(unused_variables)]
+	let stdin = std::io::stdin();
 	");
 
 	let bytes: Vec<u8> = source.bytes().collect();
 	let mut ti = 0;
 	while ti < bytes.len() {
 		match bytes[ti] {
-			b'>' => c_code.push_str("ptr++;\n"),
-			b'<' => c_code.push_str("ptr--;\n"),
-			b'+' => c_code.push_str("(*ptr)++;\n"),
-			b'-' => c_code.push_str("(*ptr)--;\n"),
-			b'.' => c_code.push_str("printf(\"%c\", *ptr);\n"),
-			b',' => c_code.push_str("*ptr = fgetc(stdin);\n"),
-			b'[' => c_code.push_str("while (*ptr != 0) {\n"),
-			b']' => c_code.push_str("} \n"),
+			b'>' => code.push_str("ptr += 1;\n"),
+			b'<' => code.push_str("ptr -= 1;\n"),
+			b'+' => code.push_str("buckets[ptr] += 1;\n"),
+			b'-' => code.push_str("buckets[ptr] -= 1;\n"),
+			b'.' => code.push_str("out.push(buckets[ptr] as char);\n"),
+			b',' => code.push_str("let buf: [u8; 1] = [0];\nstdin.read(&mut buf).expect(\"to read from stdin\");\nbuckets[ptr] = buf[0];\n"),
+			b'[' => code.push_str("while buckets[ptr] != 0 {\n"),
+			b']' => code.push_str("} \n"),
 			_ => {},
 		}
 
 		ti += 1;
 	}
-	c_code.push_str("
-	printf(\"\\n\");
-	return 0;
+	code.push_str("
+	println!(\"{}\", out);
 }
 	");
 
-	c_code
+	code
 }
 
 pub fn compile(source: &str, path: &Path) -> std::io::Result<()> {
-	let c_path = path.with_extension("c");
+	let code_path = path.with_extension("rs");
 
 	let code = generate_c(source);
-	let mut file = File::create(&c_path)?;
+	let mut file = File::create(&code_path)?;
 	file.write_all(code.as_bytes())?;
 
 	if cfg!(target_os = "windows") {
 		Command::new("cmd")
 			.arg("/C")
-			.arg(format!("gcc -o {} {}", path.with_extension("").display(), c_path.display()))
+			.arg(format!("rustc -O {}", code_path.display()))
 			.spawn()?;
 	} else {
 		Command::new("sh")
 			.arg("-c")
-			.arg(format!("gcc -o {} {}", path.with_extension("").display(), c_path.display()))
+			.arg(format!("rustc -O {}", code_path.display()))
 			.spawn()?;
 	}
 

@@ -19,8 +19,8 @@ You can also add the `-c` flag to generate a native binary:
 $ bf -c sample.bf
 ```
 
-**Note:** Generating a native binary currently relies on a C compiler called `gcc` to be in
-the system path. On Windows you can install GCC using Mingw-w64.
+**Note:** Generating a native binary currently relies on a Rust compiler, namely `rustc`, to be in
+the system path.
 
 ## Todo
 
