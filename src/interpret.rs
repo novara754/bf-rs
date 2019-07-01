@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{stdin, Read};
 
+/// Errors that can occur while interpreting a Brainfuck program.
 #[derive(Debug)]
 pub enum BrainfuckError {
 	BucketOutOfRange,
@@ -8,6 +9,7 @@ pub enum BrainfuckError {
 	UnexpectedLoopEnd,
 }
 
+/// Executes a Brainfuck program.
 pub fn run(input: &str) -> Result<(), BrainfuckError> {
 	use BrainfuckError::*;
 
@@ -89,6 +91,7 @@ pub fn run(input: &str) -> Result<(), BrainfuckError> {
 	Ok(())
 }
 
+/// Reads the contents from a given file and calls run with the contents.
 pub fn run_from_file(fp: &str) -> Result<(), BrainfuckError> {
 	let mut file = File::open(fp).expect("to open file");
 	let mut source = String::new();

@@ -1,4 +1,4 @@
-use std::fs::{File, remove_file};
+use std::fs::File;
 use std::path::Path;
 use std::io::{Read, Write};
 use std::process::Command;
@@ -7,6 +7,7 @@ fn with_indent(s: &str, n: usize) -> String {
 	format!("{}{}", "\t".repeat(n), s)
 }
 
+/// Function to generate the Rust source code for a given brainfuck program.
 pub fn generate_c(source: &str) -> String {
 	let mut code = String::from("
 fn main() {
@@ -48,6 +49,8 @@ fn main() {
 	code
 }
 
+/// Generates the Rust code for a Brainfuck program, writes it to a new file
+/// and calls the rust compiler on that file to create a native binary.
 pub fn compile(source: &str, path: &Path) -> std::io::Result<()> {
 	let code_path = path.with_extension("rs");
 
@@ -67,11 +70,10 @@ pub fn compile(source: &str, path: &Path) -> std::io::Result<()> {
 			.spawn()?;
 	}
 
-	// remove_file(c_path)?;
-
 	Ok(())
 }
 
+/// Reads the Brainfuck code from a file, and calls the compile function with the file's contents.
 pub fn compile_from_file(fp: &str) -> std::io::Result<()> {
 	let path = Path::new(fp);
 	let mut file = File::open(fp)?;
