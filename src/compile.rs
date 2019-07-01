@@ -3,6 +3,10 @@ use std::path::Path;
 use std::io::{Read, Write};
 use std::process::Command;
 
+fn with_indent(s: &str, n: usize) -> String {
+	format!("{}{}", "\t".repeat(n), s)
+}
+
 pub fn generate_c(source: &str) -> String {
 	let mut code = String::from("
 fn main() {
@@ -11,20 +15,26 @@ fn main() {
 	let mut out = String::new();
 	#[allow(unused_variables)]
 	let stdin = std::io::stdin();
-	");
-
+");
+	let mut indentation = 1;
 	let bytes: Vec<u8> = source.bytes().collect();
 	let mut ti = 0;
 	while ti < bytes.len() {
 		match bytes[ti] {
-			b'>' => code.push_str("ptr += 1;\n"),
-			b'<' => code.push_str("ptr -= 1;\n"),
-			b'+' => code.push_str("buckets[ptr] += 1;\n"),
-			b'-' => code.push_str("buckets[ptr] -= 1;\n"),
-			b'.' => code.push_str("out.push(buckets[ptr] as char);\n"),
-			b',' => code.push_str("let buf: [u8; 1] = [0];\nstdin.read(&mut buf).expect(\"to read from stdin\");\nbuckets[ptr] = buf[0];\n"),
-			b'[' => code.push_str("while buckets[ptr] != 0 {\n"),
-			b']' => code.push_str("} \n"),
+			b'>' => code.push_str(&with_indent("ptr += 1;\n", indentation)),
+			b'<' => code.push_str(&with_indent("ptr -= 1;\n", indentation)),
+			b'+' => code.push_str(&with_indent("buckets[ptr] += 1;\n", indentation)),
+			b'-' => code.push_str(&with_indent("buckets[ptr] -= 1;\n", indentation)),
+			b'.' => code.push_str(&with_indent("out.push(buckets[ptr] as char);\n", indentation)),
+			b',' => code.push_str(&with_indent("let buf: [u8; 1] = [0];\nstdin.read(&mut buf).expect(\"to read from stdin\");\nbuckets[ptr] = buf[0];\n", indentation)),
+			b'[' => {
+				code.push_str(&with_indent("while buckets[ptr] != 0 {\n", indentation));
+				indentation += 1;
+			},
+			b']' => {
+				indentation -= 1;
+				code.push_str(&with_indent("}\n", indentation));
+			}
 			_ => {},
 		}
 
