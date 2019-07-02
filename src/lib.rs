@@ -1,2 +1,2 @@
-pub mod interpret;
 pub mod compile;
+pub mod interpret;
