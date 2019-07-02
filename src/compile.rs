@@ -74,10 +74,9 @@ pub fn compile(source: &str, path: &Path) -> std::io::Result<()> {
 }
 
 /// Reads the Brainfuck code from a file, and calls the compile function with the file's contents.
-pub fn compile_from_file(fp: &str) -> std::io::Result<()> {
-	let path = Path::new(fp);
+pub fn compile_from_file(fp: &Path) -> std::io::Result<()> {
 	let mut file = File::open(fp)?;
 	let mut source = String::new();
 	file.read_to_string(&mut source)?;
-	compile(&source, path)
+	compile(&source, fp)
 }

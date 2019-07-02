@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::path::Path;
 use std::io::{stdin, Read};
 
 /// Errors that can occur while interpreting a Brainfuck program.
@@ -92,7 +93,7 @@ pub fn run(input: &str) -> Result<(), BrainfuckError> {
 }
 
 /// Reads the contents from a given file and calls run with the contents.
-pub fn run_from_file(fp: &str) -> Result<(), BrainfuckError> {
+pub fn run_from_file(fp: &Path) -> Result<(), BrainfuckError> {
 	let mut file = File::open(fp).expect("to open file");
 	let mut source = String::new();
 	file.read_to_string(&mut source).expect("to read file contents");
